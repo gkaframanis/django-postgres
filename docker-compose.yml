@@ -1,0 +1,22 @@
+version: "3.8"
+# Two containers: one running PostgreSQL, within db and the other our Django web server.
+services:
+    # For the django local server
+    web:
+        build: .
+        command: python /code/manage.py runserver 0.0.0.0:8000
+        volumes: 
+            - .:/code
+        ports:
+            - 8000:8000
+        # Our web service depends on the database to run. This means that db will be started up before web.
+        depends_on:
+            - db
+    # For the PostgreSQL database.
+    #  the db service and is ephemeral; when we execute docker-compose down all data within it will be lost.
+    # This is in contrast to our code in the web container which has a volumes mount to sync local and Docker code
+    db:
+        image: postgres:11
+        environment: 
+            # It allows us to connect without a password. This is a convenience for local development.
+            - "POSTGRES_HOST_AUTH_METHOD=trust"
